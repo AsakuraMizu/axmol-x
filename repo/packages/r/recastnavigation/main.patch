@@ -1,0 +1,34 @@
+diff --git a/DetourCrowd/Include/DetourCrowd.h b/DetourCrowd/Include/DetourCrowd.h
+index 854546f..71f73be 100644
+--- a/DetourCrowd/Include/DetourCrowd.h
++++ b/DetourCrowd/Include/DetourCrowd.h
+@@ -269,6 +269,11 @@ public:
+ 	/// @return The requested agent.
+ 	dtCrowdAgent* getEditableAgent(const int idx);
+ 
++	/// Gets the specified agentAnim from the pool.
++	///	 @param[in]		idx		The agent index. [Limits: 0 <= value < #getAgentCount()]
++	/// @return The requested agentAnim.
++	dtCrowdAgentAnimation* getEditableAgentAnim(const int idx);
++
+ 	/// The maximum number of agents that can be managed by the object.
+ 	/// @return The maximum number of agents.
+ 	int getAgentCount() const;
+diff --git a/DetourCrowd/Source/DetourCrowd.cpp b/DetourCrowd/Source/DetourCrowd.cpp
+index d7cdae0..30d55d8 100644
+--- a/DetourCrowd/Source/DetourCrowd.cpp
++++ b/DetourCrowd/Source/DetourCrowd.cpp
+@@ -498,6 +498,13 @@ dtCrowdAgent* dtCrowd::getEditableAgent(const int idx)
+ 	return &m_agents[idx];
+ }
+ 
++dtCrowdAgentAnimation* dtCrowd::getEditableAgentAnim(const int idx)
++{
++	if (idx < 0 || idx >= m_maxAgents)
++		return 0;
++	return &m_agentAnims[idx];
++}
++
+ void dtCrowd::updateAgentParameters(const int idx, const dtCrowdAgentParams* params)
+ {
+ 	if (idx < 0 || idx >= m_maxAgents)

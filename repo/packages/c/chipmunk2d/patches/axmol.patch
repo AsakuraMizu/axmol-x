@@ -1,0 +1,29 @@
+diff --git a/include/chipmunk/chipmunk.h b/include/chipmunk/chipmunk.h
+index d98ba7e..68359d3 100644
+--- a/include/chipmunk/chipmunk.h
++++ b/include/chipmunk/chipmunk.h
+@@ -125,6 +125,9 @@ typedef struct cpSpace cpSpace;
+ 
+ #include "cpSpace.h"
+ 
++// patch me: axis link android required
++#include "cpHastySpace.h"
++
+ // Chipmunk 7.0.3
+ #define CP_VERSION_MAJOR 7
+ #define CP_VERSION_MINOR 0
+diff --git a/include/chipmunk/chipmunk_types.h b/include/chipmunk/chipmunk_types.h
+index 9544da8..285e2c4 100644
+--- a/include/chipmunk/chipmunk_types.h
++++ b/include/chipmunk/chipmunk_types.h
+@@ -22,6 +22,10 @@
+ #ifndef CHIPMUNK_TYPES_H
+ #define CHIPMUNK_TYPES_H
+ 
++// EGNX use float precision, so disable chipmunk double use.
++#define CP_USE_CGTYPES 0
++#define CP_USE_DOUBLES 0
++
+ #include <stdint.h>
+ #include <float.h>
+ #include <math.h>

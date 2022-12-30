@@ -1,0 +1,15 @@
+#include "AppDelegate.hpp"
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <string>
+
+USING_NS_AX;
+
+int main(int argc, char** argv)
+{
+    // create the application instance
+    AppDelegate app;
+    return Application::getInstance()->run();
+}
