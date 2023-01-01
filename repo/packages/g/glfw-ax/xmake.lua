@@ -6,7 +6,7 @@ package("glfw-ax")
 
     add_urls("https://github.com/glfw/glfw.git")
     add_versions("3.4.0", "57cbded0760a50b9039ee0cb3f3c14f60145567c")
-    add_patches("3.4.0", path.join(os.scriptdir(), "patches", "ext.patch"), "d9bececc9d18cb29d9861e7e70239221d25f83b860edc58a7f3278e0edfd957e")
+    add_patches("3.4.0", path.join(os.scriptdir(), "patches", "ext.patch"), "344f50c90b635848c7c2b56f9fda5c18287be109d1f181d7d1f7678beec3a37c")
 
     add_configs("glfw_include", {description = "Choose submodules enabled in glfw", default = "none", type = "string", values = {"none", "vulkan", "glu", "glext", "es2", "es3"}})
 
