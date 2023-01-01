@@ -1,20 +1,11 @@
 #include "AppDelegate.hpp"
 
-#include <windows.h>
-#include <tchar.h>
-// #include <stdlib.h>
-// #include <stdio.h>
-// #include <unistd.h>
-// #include <string>
-
 USING_NS_AX;
 
-// int main(int argc, char** argv)
-// {
-//     // create the application instance
-//     AppDelegate app;
-//     return Application::getInstance()->run();
-// }
+#if (AX_TARGET_PLATFORM == AX_PLATFORM_WIN32)
+
+#include <windows.h>
+#include <tchar.h>
 
 int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLine, int nCmdShow)
 {
@@ -37,3 +28,14 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
     FreeConsole();
 #endif
 }
+
+#elif (AX_TARGET_PLATFORM == AX_PLATFORM_LINUX)
+
+int main(int argc, char** argv)
+{
+    // create the application instance
+    AppDelegate app;
+    return Application::getInstance()->run();
+}
+
+#endif

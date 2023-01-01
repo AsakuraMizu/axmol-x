@@ -1,7 +1,7 @@
 set_project("Axmol-X")
 
 add_rules("mode.debug", "mode.release")
-set_languages("cxx17")
+set_languages("cxx20")
 
 add_repositories("axmol-repo repo")
 
