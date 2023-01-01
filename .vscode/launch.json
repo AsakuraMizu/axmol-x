@@ -7,10 +7,10 @@
         {
             "type": "xmake",
             "request": "launch",
-            "name": "Debug XMake target",
-            "target": "target name",
-            "cwd": "${workspaceFolder}",
-            "stopOnEntry": true
+            "name": "Launch Game",
+            "target": "game",
+            "cwd": "",
+            "stopAtEntry": true
         }
     ]
 }

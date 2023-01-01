@@ -91,6 +91,5 @@
     "xtree": "cpp",
     "xutility": "cpp",
     "*.vert": "cpp"
-  },
-  "C_Cpp.default.compileCommands": ""
+  }
 }
