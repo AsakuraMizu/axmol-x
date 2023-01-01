@@ -1,4 +1,4 @@
-package("astc")
+package("astc-encoder")
 
     set_homepage("https://github.com/ARM-software/astc-encoder")
     set_description("The Arm ASTC Encoder, a compressor for the Adaptive Scalable Texture Compression data format.")

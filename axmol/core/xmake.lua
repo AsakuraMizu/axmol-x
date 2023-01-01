@@ -1,5 +1,5 @@
 add_requires(
-    "astc",
+    "astc-encoder",
     "bullet3",
     "clipper2",
     "freetype",
@@ -66,7 +66,7 @@ target("axmol")
     end
 
     add_packages(
-        "astc",
+        "astc-encoder",
         "bullet3",
         "chipmunk2d",
         "clipper2",
