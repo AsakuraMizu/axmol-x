@@ -23,8 +23,7 @@
  THE SOFTWARE.
  ****************************************************************************/
 
-#ifndef __HELLOWORLD_SCENE_H__
-#define __HELLOWORLD_SCENE_H__
+#pragma once
 
 #include "axmol.h"
 
@@ -36,5 +35,3 @@ public:
     // a selector callback
     void menuCloseCallback(Ref* sender);
 };
-
-#endif  // __HELLOWORLD_SCENE_H__

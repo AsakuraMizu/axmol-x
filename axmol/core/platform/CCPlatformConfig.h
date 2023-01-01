@@ -72,7 +72,8 @@ THE SOFTWARE.
 #endif
 
 // win32
-#if defined(_WIN32) && defined(_WINDOWS)
+// #if defined(_WIN32) && defined(_WINDOWS)
+#if defined(_WIN32)
 #    undef AX_TARGET_PLATFORM
 #    define AX_TARGET_PLATFORM AX_PLATFORM_WIN32
 #endif

@@ -37,11 +37,11 @@ THE SOFTWARE.
 #include "platform/CCSAXParser.h"
 #include "platform/CCPosixFileStream.h"
 
-#include <minizip/unzip.h>
+#include "unzip.h"
 #include <sys/stat.h>
 
 #if defined(_WIN32)
-#    include "ntcvt/ntcvt.hpp"
+#    include "ntcvt.hpp"
 #    include "yasio/cxx17/string_view.hpp"
 #endif
 

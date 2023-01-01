@@ -34,7 +34,7 @@ THE SOFTWARE.
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include "ntcvt/ntcvt.hpp"
+#include "ntcvt.hpp"
 
 #define DECLARE_GUARD (void)0  // std::lock_guard<std::recursive_mutex> mutexGuard(_mutex)
 
@@ -283,7 +283,7 @@ bool FileUtilsWin32::renameFile(std::string_view oldfullpath, std::string_view n
 
     if (FileUtils::getInstance()->isFileExist(newfullpath))
     {
-        if (!DeleteFile(_wNew.c_str()))
+        if (!DeleteFileW(_wNew.c_str()))
         {
             AXLOGERROR("Fail to delete file %s !Error code is 0x%x", newfullpath.data(), GetLastError());
         }
@@ -397,8 +397,8 @@ bool FileUtilsWin32::removeDirectory(std::string_view dirPath) const
     }
     std::wstring wpath = ntcvt::from_chars(dirPathCopy);
     std::wstring files = wpath + L"*.*";
-    WIN32_FIND_DATA wfd;
-    HANDLE search = FindFirstFileEx(files.c_str(), FindExInfoStandard, &wfd, FindExSearchNameMatch, NULL, 0);
+    WIN32_FIND_DATAW wfd;
+    HANDLE search = FindFirstFileExW(files.c_str(), FindExInfoStandard, &wfd, FindExSearchNameMatch, NULL, 0);
     bool ret      = true;
     if (search != INVALID_HANDLE_VALUE)
     {
@@ -421,7 +421,7 @@ bool FileUtilsWin32::removeDirectory(std::string_view dirPath) const
                     ret = ret && DeleteFileW(temp.c_str());
                 }
             }
-            find = FindNextFile(search, &wfd);
+            find = FindNextFileW(search, &wfd);
         }
         FindClose(search);
     }

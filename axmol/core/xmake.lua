@@ -1,10 +1,10 @@
 add_requires(
     "astc",
     "bullet3",
-    "chipmunk2d",
     "clipper2",
     "freetype",
     "glad",
+    "libcurl",
     "libjpeg",
     "libogg",
     "libpng",
@@ -13,30 +13,44 @@ add_requires(
     "llhttp",
     "lz4",
     "minimp3",
-    "mio",
     "mz12",
     "openal-soft",
     "poly2tri",
-    "pugixml v1.12.1",
     "rapidjson v1.1.0",
-    "recastnavigation main",
-    "robin-map",
     "stb",
     "uthash",
     "xsbase",
     "xxhash",
-    "yasio"
-    )
+    "yasio")
+add_requires("chipmunk2d-ax", {alias="chipmunk2d"})
+add_requires("glfw-ax", {alias="glfw"})
+add_requires("mio-ax", {alias="mio"})
+add_requires("openssl3", {alias="openssl"})
+add_requires("pugixml-ax v1.12.1", {alias="pugixml"})
+add_requires("recastnavigation-ax main", {alias="recastnavigation"})
+add_requires("robin-map-ax", {alias="robin-map"})
 
 if is_os("linux") then
-    add_requires("fontconfig", "glfw")
+    add_requires("fontconfig")
+end
+if is_os("windows") then
+    add_requires("ntcvt")
 end
 
 target("axmol")
     set_kind("static")
     add_includedirs(".", "platform", {public=true})
+    add_defines("AX_STATIC", {public=true})
 
-    add_files("2d/*.cpp", "3d/*.cpp", "audio/*.cpp", "base/*.cpp", "math/*.cpp", "navmesh/*.cpp", "network/*.cpp", "physics/*.cpp", "physics3d/*.cpp", "platform/*.cpp", "renderer/*.cpp", "renderer/backend/*.cpp", "ui/*.cpp", "axmol.cpp")
+    add_files("2d/*.cpp", "3d/*.cpp", "audio/*.cpp", "base/*.cpp|CCController-*", "math/*.cpp", "navmesh/*.cpp", "network/*.cpp", "physics/*.cpp", "physics3d/*.cpp", "platform/*.cpp", "renderer/*.cpp", "renderer/backend/*.cpp", "ui/*.cpp", "axmol.cpp")
+
+    if is_os("linux") or is_os("windows") then
+        add_files("base/CCController-linux-win32.cpp")
+    elseif is_os("android") then
+        add_files("base/CCController-android.cpp")
+    else
+        add_files("base/CCController-apple.mm")
+    end
 
     if is_os("linux") then
         add_files("platform/linux/*.cpp", "platform/desktop/*.cpp")
@@ -58,6 +72,8 @@ target("axmol")
         "clipper2",
         "freetype",
         "glad",
+        "glfw",
+        "libcurl",
         "libjpeg",
         "libogg",
         "libpng",
@@ -69,6 +85,7 @@ target("axmol")
         "mio",
         "mz12",
         "openal-soft",
+        "openssl",
         "poly2tri",
         "pugixml",
         "rapidjson",
@@ -83,5 +100,9 @@ target("axmol")
         )
 
     if is_os("linux") then
-        add_packages("fontconfig", "glfw", {public=true})
+        add_packages("fontconfig", {public=true})
+    end
+    if is_os("windows") then
+        add_packages("ntcvt", {public=true})
+        add_links("Version")
     end

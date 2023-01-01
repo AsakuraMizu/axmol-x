@@ -44,7 +44,7 @@
 #        include "platform/win32/inet_pton_mingw.h"
 #    endif
 #    define bzero(a, b) memset(a, 0, b)
-#    include "ntcvt/ntcvt.hpp"
+#    include "ntcvt.hpp"
 #endif
 
 #include "base/CCDirector.h"

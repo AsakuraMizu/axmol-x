@@ -45,7 +45,7 @@ THE SOFTWARE.
 #include "renderer/backend/opengl/MacrosGL.h"
 
 #if defined(_WIN32)
-#    include "glfw3ext.h"
+#    include "GLFW/glfw3ext.h"
 #endif
 
 #if AX_ICON_SET_SUPPORT

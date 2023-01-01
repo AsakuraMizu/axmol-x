@@ -25,7 +25,7 @@ THE SOFTWARE.
 ****************************************************************************/
 #include "platform/CCCommon.h"
 #include "platform/CCStdC.h"
-#include "ntcvt/ntcvt.hpp"
+#include "ntcvt.hpp"
 
 NS_AX_BEGIN
 

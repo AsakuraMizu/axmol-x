@@ -28,7 +28,7 @@ THE SOFTWARE.
 #include "platform/CCFileUtils.h"
 #include "platform/CCStdC.h"
 
-#include "ntcvt/ntcvt.hpp"
+#include "ntcvt.hpp"
 
 NS_AX_BEGIN
 

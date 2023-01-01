@@ -39,7 +39,7 @@ THE SOFTWARE.
 #    ifndef GLFW_EXPOSE_NATIVE_WGL
 #        define GLFW_EXPOSE_NATIVE_WGL
 #    endif
-#    include "glfw3native.h"
+#    include "GLFW/glfw3native.h"
 #endif /* (AX_TARGET_PLATFORM == AX_PLATFORM_WIN32) */
 
 #if (AX_TARGET_PLATFORM == AX_PLATFORM_MAC)
@@ -49,7 +49,7 @@ THE SOFTWARE.
 #    ifndef GLFW_EXPOSE_NATIVE_COCOA
 #        define GLFW_EXPOSE_NATIVE_COCOA
 #    endif
-#    include "glfw3native.h"
+#    include "GLFW/glfw3native.h"
 #endif  // #if (AX_TARGET_PLATFORM == AX_PLATFORM_MAC)
 
 NS_AX_BEGIN

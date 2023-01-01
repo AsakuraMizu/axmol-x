@@ -1,12 +1,6 @@
-package("mio")
-
-    set_kind("library", {headeronly = true})
-    set_homepage("https://github.com/mandreyel/mio")
-    set_description("Cross-platform C++11 header-only library for memory mapped file IO")
-    set_license("MIT")
-
-    add_urls("https://github.com/mandreyel/mio.git")
-    add_versions("2021.9.21", "3f86a95c0784d73ce6815237ec33ed25f233b643")
+package("mio-ax")
+    set_base("mio")
+    add_patches("2021.9.21", path.join(os.scriptdir(), "windows.patch"), "3f00675ab8051db813e6dcc6e49e28949deca0d78f503740a7f6813a1aa37b15")
 
     on_install(function (package)
         os.cp("single_include/mio", package:installdir("include"))
@@ -20,7 +14,7 @@ package("mio")
               #include <algorithm>
               #include <mio/mio.hpp>
               static void test() {
-                mio::mmap_source mmap(0, 0, mio::map_entire_file);
+                mio::mmap_source mmap();
               }
             ]]
         }, {configs = {languages = "c++11"}}))

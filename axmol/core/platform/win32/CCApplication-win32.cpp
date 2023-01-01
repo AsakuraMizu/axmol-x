@@ -33,7 +33,7 @@ THE SOFTWARE.
 #include <timeapi.h>
 
 #include "yasio/cxx17/string_view.hpp"
-#include "ntcvt/ntcvt.hpp"
+#include "ntcvt.hpp"
 /**
 @brief    This function change the PVRFrame show/hide setting in register.
 @param  bEnable If true show the PVRFrame window, otherwise hide.
@@ -264,7 +264,7 @@ std::string Application::getVersion()
 
         if (GetFileVersionInfo(szVersionFile, verHandle, verSize, verData))
         {
-            if (VerQueryValue(verData, L"\\", (VOID FAR * FAR*)&lpBuffer, &size))
+            if (VerQueryValueW(verData, L"\\", (VOID FAR * FAR*)&lpBuffer, &size))
             {
                 if (size)
                 {
@@ -347,7 +347,7 @@ static void PVRFrameEnableControlWindow(bool bEnable)
             && svNewData != wszOldData))  // but new data and old data not equal
     {
         dwSize = static_cast<DWORD>(sizeof(WCHAR) * (svNewData.length() + 1));
-        RegSetValueEx(hKey, wszValue, 0, REG_SZ, (const BYTE*)svNewData.data(), dwSize);
+        RegSetValueExW(hKey, wszValue, 0, REG_SZ, (const BYTE*)svNewData.data(), dwSize);
     }
 
     RegCloseKey(hKey);

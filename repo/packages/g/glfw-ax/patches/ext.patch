@@ -1,0 +1,321 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index f5e538bf..57f9c74c 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -148,7 +148,7 @@ endif()
+ #--------------------------------------------------------------------
+ if (GLFW_INSTALL)
+     install(DIRECTORY include/GLFW DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+-            FILES_MATCHING PATTERN glfw3.h PATTERN glfw3native.h)
++            FILES_MATCHING PATTERN glfw3.h PATTERN glfw3native.h PATTERN glfw3ext.h)
+ 
+     install(FILES "${GLFW_BINARY_DIR}/src/glfw3Config.cmake"
+                   "${GLFW_BINARY_DIR}/src/glfw3ConfigVersion.cmake"
+diff --git a/include/GLFW/glfw3ext.h b/include/GLFW/glfw3ext.h
+new file mode 100644
+index 00000000..bb48f8ee
+--- /dev/null
++++ b/include/GLFW/glfw3ext.h
+@@ -0,0 +1,62 @@
++#ifndef _GLFW3EXT_H_
++#define _GLFW3EXT_H_
++#include "glfw3.h"
++
++#ifndef GLFW_EXPOSE_NATIVE_WIN32
++#define GLFW_EXPOSE_NATIVE_WIN32
++#endif
++#ifndef GLFW_EXPOSE_NATIVE_WGL
++#define GLFW_EXPOSE_NATIVE_WGL
++#endif
++#include "glfw3native.h"
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
++#ifndef GLFW_ALPHA_MASK
++#define GLFW_ALPHA_MASK 0x00021011
++#endif
++
++/*! @brief The function signature for mouse button callbacks extension.
++*   @Added by halx99
++*
++*  This is the function signature for mouse button callback functions.
++*
++*  @param[in] window The window that received the event.
++*  @param[in] button The [mouse button](@ref buttons) that was pressed or
++*  released.
++*  @param[in] action One of `GLFW_PRESS` or `GLFW_RELEASE`.
++*  @param[in] mods Bit field describing which [modifier keys](@ref mods) were
++*  held down.
++*  @param[in] cursor X
++*  @param[in] cursor Y
++*
++*  @sa glfwSetMouseButtonCallback
++*
++*  @ingroup input
++*/
++typedef void(*GLFWXmousebuttonfun)(GLFWwindow*, int, int, int, double, double);
++typedef int(*GLFWXloadImagefun)(void** ppvImage);
++typedef void(*GLFWXunloadImagefun)(void* pvImage);
++typedef void(*GLFWXdrawImagefun)(HDC hdc, void* pvImage);
++typedef void* (*GLFWXEGLGetDisplayFun)(void* pUnknownAPI, GLFWwindow*);
++
++GLFWAPI int glfwxInit(void);
++
++GLFWAPI void glfwxTerminate(void);
++
++GLFWAPI void glfwxSetParent(HWND hwndParent);
++
++
++// unused?
++// GLFWAPI void glfwxSetWindowPos(GLFWwindow* handle, int xpos, int ypos, int width, int height);
++
++GLFWAPI void glfwxSetBackgroundDriver(GLFWXloadImagefun imageLoader, GLFWXdrawImagefun imageDrawer, GLFWXunloadImagefun imageUnloader); // TODO: rename function name
++
++#ifdef __cplusplus
++}
++#endif
++
++#endif
++
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 01f191c9..5cc131e1 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -40,7 +40,7 @@ if (GLFW_BUILD_WIN32)
+     target_compile_definitions(glfw PRIVATE _GLFW_WIN32)
+     target_sources(glfw PRIVATE win32_platform.h win32_joystick.h win32_init.c
+                                 win32_joystick.c win32_monitor.c win32_window.c
+-                                wgl_context.c)
++                                wgl_context.c glfw3ext_internal.c glfw3ext_impl.c)
+ endif()
+ 
+ if (GLFW_BUILD_X11)
+diff --git a/src/glfw3ext_impl.c b/src/glfw3ext_impl.c
+new file mode 100644
+index 00000000..a450afdc
+--- /dev/null
++++ b/src/glfw3ext_impl.c
+@@ -0,0 +1,126 @@
++#include "glfw3ext_internal.h"
++
++#include <string.h>
++#include <stdlib.h>
++#if defined(_MSC_VER)
++#include <malloc.h>
++#endif
++
++GLFWXconfig _glfwx;
++GLFWbool _glfwxInitialized;
++
++static HANDLE internalCreateFileMapping(uint64_t size)
++{
++	return CreateFileMappingW(
++				NULL,
++				NULL,
++				PAGE_READWRITE,
++				size >> 32,
++				size & 0x00000000ffffffff,
++				NULL);
++}
++
++GLFWAPI int glfwxInit(void)
++{
++	if (_glfwxInitialized)
++		return GLFW_TRUE;
++
++	memset(&_glfwx, 0, sizeof(_glfwx));
++
++	_glfwx.wglvi.msimg32 = LoadLibrary(TEXT("msimg32.dll"));
++	if (_glfwx.wglvi.msimg32)
++	{
++		_glfwx.wglvi.alphaBlend = (GLFWXalphaBlendFunc)GetProcAddress(_glfwx.wglvi.msimg32, "AlphaBlend");
++	}
++
++	_glfwx.wglvi.screenW = GetSystemMetrics(SM_CXSCREEN);
++	_glfwx.wglvi.screenH = GetSystemMetrics(SM_CYSCREEN);
++
++	uint64_t size = _glfwx.wglvi.screenW * _glfwx.wglvi.screenH * 4;
++	double KB = (double)size / (1024);
++	double MB = KB / (1024);
++	// _glfwx.wglvi.hSectionBackDIB = internalCreateFileMapping(size);
++	_glfwx.wglvi.hSectionGLDIB = internalCreateFileMapping(size);
++
++	_glfwxInitialized = GLFW_TRUE;
++
++	if (!glfwInit())
++		glfwxTerminate();
++
++	return _glfwxInitialized;
++}
++
++GLFWAPI void glfwxTerminate(void)
++{
++	if (!_glfwxInitialized)
++		return;
++
++	if (_glfwx.wglvi.hSectionGLDIB)
++		CloseHandle(_glfwx.wglvi.hSectionGLDIB);
++
++	if (_glfwx.wglvi.dcBackground)
++		DeleteDC(_glfwx.wglvi.dcBackground);
++
++	if (_glfwx.wglvi.unloadImage){
++		_glfwx.wglvi.unloadImage(_glfwx.wglvi.pvImage);
++	}
++
++	if (_glfwx.wglvi.msimg32)
++		FreeLibrary(_glfwx.wglvi.msimg32);
++
++	memset(&_glfwx, 0, sizeof(_glfwx));
++
++	glfwTerminate();
++
++	_glfwxInitialized = GLFW_FALSE;
++}
++
++// Return the maxiumum of the specified values
++//
++static int Max(int a, int b)
++{
++	return (a > b) ? a : b;
++}
++
++//////////////////////////////////////////////////////////////////////////
++//////                        GLFW public API                       //////
++//////////////////////////////////////////////////////////////////////////
++
++GLFWAPI void glfwxSetParent(HWND hwndParent)
++{
++	_glfwx.hwndGLParent = hwndParent;
++}
++
++GLFWAPI void glfwxSetBackgroundDriver(GLFWXloadImagefun imageLoader, GLFWXdrawImagefun imageDrawer, GLFWXunloadImagefun imageUnloader)
++{
++	if (!_glfwxInitialized)
++		return;
++
++	_glfwx.wglvi.loadImage = imageLoader;
++	_glfwx.wglvi.drawImage = imageDrawer;
++	_glfwx.wglvi.unloadImage = imageUnloader;
++
++	/*if (!_glfwx.wglvi.irregularEnabled) {
++		int bits = _glfw.hints.redBits + _glfw.hints.blueBits + _glfw.hints.greenBits + _glfw.hints.alphaBits;
++		HDC hdcGL = _glfwxCreateGLSurfaceDIB(_glfwx.wglvi.screenW, _glfwx.wglvi.screenH, bits);
++		assert(hdcGL);
++		_glfwx.wglvi.hdcGL = hdcGL;
++	}*/
++}
++
++// unused ?
++// GLFWAPI void glfwxSetWindowPos(GLFWwindow* handle, int xpos, int ypos, int width, int height)
++// {
++//     extern DWORD getWindowStyle(const _GLFWwindow* window);
++//     extern DWORD getWindowExStyle(const _GLFWwindow* window);
++// 
++//     _GLFWwindow* window = (_GLFWwindow*)handle;
++//     assert(window != NULL);
++// 
++//     RECT rect = { xpos, ypos, width, height };
++//     AdjustWindowRectEx(&rect, getWindowStyle(window),
++//         FALSE, getWindowExStyle(window));
++//     SetWindowPos(window->win32.handle, NULL, rect.left, rect.top,
++//         rect.right - rect.left, rect.bottom - rect.top,
++//         SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOOWNERZORDER);
++// }
+diff --git a/src/glfw3ext_internal.c b/src/glfw3ext_internal.c
+new file mode 100644
+index 00000000..7d36b598
+--- /dev/null
++++ b/src/glfw3ext_internal.c
+@@ -0,0 +1,25 @@
++#include "glfw3ext_internal.h"
++
++HBITMAP _glfwxCreateDIB(HDC hdc, float weight, float height, void** ppvBits, HANDLE hSection)
++{
++	BITMAPINFOHEADER BIH;
++
++	int iSize = sizeof(BITMAPINFOHEADER);
++	memset(&BIH, 0, iSize);
++
++	BIH.biSize = iSize;
++	BIH.biWidth = (LONG)(weight);
++	BIH.biHeight = (LONG)height;
++	BIH.biPlanes = 1;
++	BIH.biBitCount = 32;
++	BIH.biCompression = BI_RGB;
++
++	return CreateDIBSection(
++		hdc,
++		(BITMAPINFO*)&BIH,
++		DIB_RGB_COLORS,
++		ppvBits,
++		hSection,
++		0);
++}
++
+diff --git a/src/glfw3ext_internal.h b/src/glfw3ext_internal.h
+new file mode 100644
+index 00000000..20aeb3a8
+--- /dev/null
++++ b/src/glfw3ext_internal.h
+@@ -0,0 +1,58 @@
++#ifndef _GLFWEXT_INTERNAL_H_
++#define _GLFWEXT_INTERNAL_H_
++#include <assert.h>
++#include "internal.h"
++#include "../include/GLFW/glfw3ext.h"
++
++typedef BOOL (WINAPI *GLFWXalphaBlendFunc)(
++	_In_ HDC hdcDest,
++	_In_ int xoriginDest,
++	_In_ int yoriginDest,
++	_In_ int wDest,
++	_In_ int hDest,
++	_In_ HDC hdcSrc,
++	_In_ int xoriginSrc,
++	_In_ int yoriginSrc,
++	_In_ int wSrc,
++	_In_ int hSrc,
++	_In_ BLENDFUNCTION ftn);
++
++typedef struct _glfwx
++{
++	/// support create GL surface as child window of exist window
++	HWND     hwndGLParent;
++
++	/// support irregular window
++	/// GL Render Target is compatible DIB dc
++	struct {
++		HMODULE   msimg32;
++		GLFWXalphaBlendFunc alphaBlend;
++		int       screenW;
++		int       screenH;
++		void*     pvImage; // when alpha mask enabled
++		GLFWXloadImagefun loadImage; // end use can use gdiplus to load the image
++		GLFWXdrawImagefun drawImage;
++		GLFWXunloadImagefun unloadImage;
++		HDC       dcBackground;
++
++		HANDLE    hSectionGLDIB;
++	} wglvi;
++
++    // EGL extensions
++    // GLFWXEGLGetDisplayFun glfwxEGLGetDisplay;
++} GLFWXconfig;
++
++extern GLFWXconfig _glfwx;
++
++extern GLFWbool _glfwxInitialized;
++
++/*! @brief create a compatible DIB DC as GLSurface.
++*  @param[in] width: the width of DIB.
++*  @param[in] height: the height of DIB.
++*  @param[in] bits: 32 is ok.
++*  of the client area of the window.
++*  @ingroup event x-studio spec
++*/
++HBITMAP _glfwxCreateDIB(HDC hdc, float width, float height, void** ppvBits, HANDLE hSection); // bits = 32
++
++#endif
